@@ -1,8 +1,14 @@
-import Image from 'next/link'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/server'
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient()
+  const { data: newArrivals } = await supabase
+    .from('products')
+    .select('id, name, slug, price, category, images')
+    .order('created_at', { ascending: false })
+    .limit(4)
   return (
     <div className="flex flex-col flex-1">
       {/* Hero Section */}
@@ -64,7 +70,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* New Arrivals (Placeholder) */}
+      {/* New Arrivals */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-12">
@@ -73,20 +79,34 @@ export default function Home() {
               Shop Now
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="group flex flex-col">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted mb-4">
-                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                    Image
+          {newArrivals && newArrivals.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+              {newArrivals.map((product) => (
+                <Link key={product.id} href={`/product/${product.slug}`} className="group flex flex-col">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted mb-4">
+                    {product.images && product.images.length > 0 ? (
+                      <div
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                        style={{ backgroundImage: `url('${product.images[0]}')` }}
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+                        No Image
+                      </div>
+                    )}
                   </div>
-                </div>
-                <h3 className="font-semibold text-lg">Premium Product {i}</h3>
-                <p className="text-muted-foreground text-sm mb-2">Black / M</p>
-                <p className="font-medium">₹1,299</p>
-              </div>
-            ))}
-          </div>
+                  <h3 className="font-semibold text-lg group-hover:underline underline-offset-4">{product.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-1">{product.category}</p>
+                  <p className="font-medium">₹{product.price}</p>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>No products yet. Add some in the admin dashboard!</p>
+              <Link href="/shop" className="mt-4 inline-block text-sm font-medium hover:underline underline-offset-4">Browse Shop →</Link>
+            </div>
+          )}
         </div>
       </section>
     </div>

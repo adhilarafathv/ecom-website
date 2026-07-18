@@ -26,6 +26,7 @@ export default function ProductDetailsClient({ product }: { product: any }) {
       size: selectedSize,
       color: selectedColor,
       quantity,
+      image: mainImage || undefined,
     })
     
     setAdded(true)

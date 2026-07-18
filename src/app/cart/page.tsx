@@ -29,7 +29,14 @@ export default function CartPage() {
         <div className="flex-1 space-y-6">
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 border rounded-2xl p-4 items-center">
-              <div className="h-24 w-24 bg-muted rounded-xl shrink-0" />
+              <div className="h-24 w-24 rounded-xl shrink-0 bg-muted relative overflow-hidden">
+                {item.image ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url('${item.image}')` }}
+                  />
+                ) : null}
+              </div>
               
               <div className="flex-1 min-w-0">
                 <Link href={`/product/${item.slug}`} className="font-semibold hover:underline truncate block">
