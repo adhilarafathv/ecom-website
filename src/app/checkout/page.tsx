@@ -84,7 +84,7 @@ export default function CheckoutPage() {
       if (itemsError) throw itemsError
 
       // 3. Format WhatsApp Message
-      const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210'
+      const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '918111937217'
       const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://store.com'
 
       const itemsList = items.map((item, index) => {
