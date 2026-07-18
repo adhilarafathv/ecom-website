@@ -43,10 +43,20 @@ export default function CheckoutPage() {
       const supabase = createClient()
       const total = getTotalPrice()
 
+      // Generate order ID client-side to avoid needing a SELECT RLS policy
+      const orderId = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0
+            const v = c === 'x' ? r : (r & 0x3) | 0x8
+            return v.toString(16)
+          })
+
       // 1. Insert Order
-      const { data: orderData, error: orderError } = await supabase
+      const { error: orderError } = await supabase
         .from('orders')
         .insert({
+          id: orderId,
           customer_name: formData.fullName,
           phone: formData.phone,
           address: formData.address + (formData.landmark ? `, Landmark: ${formData.landmark}` : ''),
@@ -54,12 +64,8 @@ export default function CheckoutPage() {
           total: total,
           status: 'Pending',
         })
-        .select('id')
-        .single()
 
       if (orderError) throw orderError
-      
-      const orderId = orderData.id
 
       // 2. Insert Order Items
       const orderItemsToInsert = items.map(item => ({
@@ -95,9 +101,10 @@ export default function CheckoutPage() {
       // 5. Clear cart and redirect
       clearCart()
       router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error placing order:', error)
-      alert('There was an error placing your order. Please try again.')
+      const errorMsg = error?.message || (typeof error === 'string' ? error : JSON.stringify(error))
+      alert(`There was an error placing your order: ${errorMsg}. Please try again.`)
     } finally {
       setIsSubmitting(false)
     }
