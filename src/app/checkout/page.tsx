@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/useCartStore'
 import { Button } from '@/components/ui/button'
@@ -24,10 +24,13 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Prevent accessing checkout with empty cart
-  if (items.length === 0) {
-    if (typeof window !== 'undefined') {
+  useEffect(() => {
+    if (items.length === 0) {
       router.push('/cart')
     }
+  }, [items.length, router])
+
+  if (items.length === 0) {
     return null
   }
 
